@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bugsweeper</title>
+  <style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 30px);  /* 10 columns, 30px each */
+      gap: 2px;
+      justify-content: center;
+      margin: 0 auto;
+    }
+    .cell {
+      width: 30px;
+      height: 30px;
+      background-color: lightgray;
+      text-align: center;
+      line-height: 30px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+    }
+    .cell.revealed {
+      background-color: white;
+    }
+    .cell.mine {
+      background-color: red;
+      color: white;
+    }
+    .cell.flag {
+      background-color: yellow;
+    }
+  </style>
+</head>
+<body>
+  <h1>Minesweeper</h1>
+  <div id="minesweeper">
+    <div class="grid" id="grid"></div>
+    <button id="restart">Restart</button>
+  </div>
+
+  <button id="btn-start-game">Start Game</button>
+
+  <script src="script.js"></script> <!-- Link to the external script -->
+</body>
+</html>
