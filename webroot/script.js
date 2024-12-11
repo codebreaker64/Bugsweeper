@@ -1,155 +1,159 @@
 class App {
   constructor() {
-    this.gridSize = 10;
-    this.mineCount = 10;
     this.board = [];
-    this.revealedCount = 0;
+    this.rows = 8;
+    this.columns = 8;
+    this.minesCount = 5;
+    this.minesLocation = [];
+    this.tilesClicked = 0;
+    this.flagEnabled = false;
+    this.gameOver = false;
 
-    const restartButton = document.querySelector('#restart');
-    const startGameButton = document.querySelector('#btn-start-game');
-
-    // Initialize the Minesweeper game when the start button is clicked
-    startGameButton.addEventListener('click', () => {
-      this.initGame();
-    });
-
-    // Restart the game when the restart button is clicked
-    restartButton.addEventListener('click', () => {
-      this.initGame();
-    });
+    window.onload = () => {
+      this.startGame();
+    };
   }
 
-  // Initialize the game and setup the grid
-  initGame() {
-    console.log("Initializing game...");
+  setMines() {
+    let minesLeft = this.minesCount;
+    while (minesLeft > 0) {
+      let r = Math.floor(Math.random() * this.rows);
+      let c = Math.floor(Math.random() * this.columns);
+      let id = r.toString() + "-" + c.toString();
 
-    // Reset the board and revealed cells count
-    this.board = Array.from({ length: this.gridSize }, () =>
-      Array(this.gridSize).fill({ revealed: false, mine: false, flag: false })
-    );
-    this.revealedCount = 0;
-    this.placeMines();
-    this.renderBoard();
-  }
-
-  // Place mines randomly on the grid
-  placeMines() {
-    let minesPlaced = 0;
-    console.log("Placing mines...");
-
-    while (minesPlaced < this.mineCount) {
-      const row = Math.floor(Math.random() * this.gridSize);
-      const col = Math.floor(Math.random() * this.gridSize);
-      
-      // Check if this cell already has a mine
-      if (!this.board[row][col].mine) {
-        this.board[row][col].mine = true;
-        minesPlaced++;
-        console.log(`Placed mine at row: ${row}, col: ${col}`);
+      if (!this.minesLocation.includes(id)) {
+        this.minesLocation.push(id);
+        minesLeft -= 1;
       }
     }
   }
 
-  // Render the grid on the screen
-  renderBoard() {
-    const grid = document.getElementById('grid');
-    grid.innerHTML = ''; // Clear the grid before rendering
+  startGame() {
+    document.getElementById("bugs-count").innerText = this.minesCount;
+    document.getElementById("broom-button").addEventListener("click", this.setFlag.bind(this));
+    this.setMines();
 
-    for (let row = 0; row < this.gridSize; row++) {
-      for (let col = 0; col < this.gridSize; col++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.dataset.row = row;
-        cell.dataset.col = col;
+    for (let r = 0; r < this.rows; r++) {
+      let row = [];
+      for (let c = 0; c < this.columns; c++) {
+        let tile = document.createElement("div");
+        tile.id = r.toString() + "-" + c.toString();
+        tile.classList.add("tile");
 
-        // Only show the cell content if it's revealed
-        if (this.board[row][col].revealed) {
-          if (this.board[row][col].mine) {
-            cell.classList.add('mine');
-            cell.innerText = '💣'; // Bomb symbol
-          } else {
-            const adjacentMines = this.countAdjacentMines(row, col);
-            if (adjacentMines > 0) {
-              cell.innerText = adjacentMines; // Show the number of adjacent bombs
-            }
-            cell.classList.add('revealed');
-          }
-        }
+        // Use an anonymous function to ensure "this" refers to the clicked tile
+        tile.addEventListener("click", (event) => this.clickTile(event));
 
-        // Handle cell click event to reveal the cell
-        cell.onclick = () => this.revealCell(row, col);
-        grid.appendChild(cell);
+        document.getElementById("board").append(tile);
+        row.push(tile);
       }
+      this.board.push(row);
+    }
+    console.log(this.board);
+  }
+
+  setFlag() {
+    if (this.flagEnabled) {
+      this.flagEnabled = false;
+      document.getElementById("broom-button").style.backgroundColor = "lightgray";
+    } else {
+      this.flagEnabled = true;
+      document.getElementById("broom-button").style.backgroundColor = "darkgray";
     }
   }
 
-  // Count the number of bombs around a given cell
-  countAdjacentMines(row, col) {
-    let count = 0;
-    const directions = [
-      [-1, -1], [-1, 0], [-1, 1],
-      [0, -1], [0, 1],
-      [1, -1], [1, 0], [1, 1],
-    ];
-    directions.forEach(([dr, dc]) => {
-      const r = row + dr, c = col + dc;
-      if (r >= 0 && r < this.gridSize && c >= 0 && c < this.gridSize && this.board[r][c].mine) {
-        count++;
+  clickTile(event) {
+    const tile = event.target; // This will refer to the clicked tile
+
+    if (this.gameOver || tile.classList.contains("tile-clicked")) {
+      return;
+    }
+
+    if (this.flagEnabled) {
+      if (tile.innerText == "") {
+        tile.innerText = "🧹";
+      } else if (tile.innerText == "🧹") {
+        tile.innerText = "";
       }
-    });
-    return count;
-  }
-
-  // Handle the logic when a player clicks on a cell
-  revealCell(row, col) {
-    if (this.board[row][col].revealed || this.board[row][col].flag) return;
-
-    // Reveal the clicked cell
-    this.board[row][col].revealed = true;
-    this.revealedCount++;
-
-    // If the clicked cell is a mine, show Game Over
-    if (this.board[row][col].mine) {
-      alert('Game Over!');
-      this.revealAll(); // Reveal all cells
-    } else if (this.revealedCount === this.gridSize * this.gridSize - this.mineCount) {
-      alert('You Win!');
+      return;
     }
 
-    // If the cell has no adjacent mines, reveal the surrounding cells
-    if (this.countAdjacentMines(row, col) === 0) {
-      this.revealAdjacentCells(row, col);
+    if (this.minesLocation.includes(tile.id)) {
+      this.gameOver = true;
+      this.revealMines();
+      return;
     }
 
-    // Re-render the board with updated state
-    this.renderBoard();
+    let coords = tile.id.split("-");
+    let r = parseInt(coords[0]);
+    let c = parseInt(coords[1]);
+    this.checkMine(r, c);
   }
 
-  // Reveal all adjacent cells around a cell with no adjacent mines
-  revealAdjacentCells(row, col) {
-    const directions = [
-      [-1, -1], [-1, 0], [-1, 1],
-      [0, -1], [0, 1],
-      [1, -1], [1, 0], [1, 1],
-    ];
-
-    directions.forEach(([dr, dc]) => {
-      const r = row + dr, c = col + dc;
-      if (r >= 0 && r < this.gridSize && c >= 0 && c < this.gridSize && !this.board[r][c].revealed && !this.board[r][c].mine) {
-        this.board[r][c].revealed = true;
-        this.revealedCount++;
-        // Recursively reveal adjacent cells if they have no nearby mines
-        if (this.countAdjacentMines(r, c) === 0) {
-          this.revealAdjacentCells(r, c);
+  revealMines() {
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.columns; c++) {
+        let tile = this.board[r][c];
+        if (this.minesLocation.includes(tile.id)) {
+          tile.innerText = "🪳";
+          tile.style.backgroundColor = "red";
         }
       }
-    });
+    }
   }
 
-  // Reveal all cells (used when game is over)
-  revealAll() {
-    this.board.forEach((row) => row.forEach((cell) => (cell.revealed = true)));
-    this.renderBoard();
+  checkMine(r, c) {
+    if (r < 0 || r >= this.rows || c < 0 || c >= this.columns) {
+      return;
+    }
+
+    let tile = this.board[r][c];
+    if (tile.classList.contains("tile-clicked")) {
+      return;
+    }
+
+    tile.classList.add("tile-clicked");
+    this.tilesClicked += 1;
+
+    let minesFound = 0;
+
+    minesFound += this.checkTile(r - 1, c - 1);
+    minesFound += this.checkTile(r - 1, c);
+    minesFound += this.checkTile(r - 1, c + 1);
+    minesFound += this.checkTile(r, c - 1);
+    minesFound += this.checkTile(r, c + 1);
+    minesFound += this.checkTile(r + 1, c - 1);
+    minesFound += this.checkTile(r + 1, c);
+    minesFound += this.checkTile(r + 1, c + 1);
+
+    if (minesFound > 0) {
+      tile.innerText = minesFound;
+      tile.classList.add("x" + minesFound.toString());
+    } else {
+      // If no mines are around, recursively check adjacent tiles
+      this.checkMine(r - 1, c - 1);
+      this.checkMine(r - 1, c);
+      this.checkMine(r - 1, c + 1);
+      this.checkMine(r, c - 1);
+      this.checkMine(r, c + 1);
+      this.checkMine(r + 1, c - 1);
+      this.checkMine(r + 1, c);
+      this.checkMine(r + 1, c + 1);
+    }
+
+    if (this.tilesClicked === this.rows * this.columns - this.minesCount) {
+      document.getElementById("bugs-count").innerText = "cleared";
+      this.gameOver = true;
+    }
+  }
+
+  checkTile(r, c) {
+    if (r < 0 || r >= this.rows || c < 0 || c >= this.columns) {
+      return 0;
+    }
+    if (this.minesLocation.includes(r.toString() + "-" + c.toString())) {
+      return 1;
+    }
+    return 0;
   }
 }
 
