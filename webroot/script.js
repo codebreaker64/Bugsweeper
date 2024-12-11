@@ -3,7 +3,7 @@ class App {
     this.board = [];
     this.rows = 8;
     this.columns = 8;
-    this.minesCount = 5;
+    this.minesCount = 10;
     this.minesLocation = [];
     this.tilesClicked = 0;
     this.flagEnabled = false;
@@ -63,15 +63,20 @@ class App {
 
   clickTile(event) {
     const tile = event.target; // This will refer to the clicked tile
+    const flagSound = new Audio('sounds/flag.mp3');
+    const clickSound = new Audio('sounds/click.mp3');
 
     if (this.gameOver || tile.classList.contains("tile-clicked")) {
       return;
     }
 
     if (this.flagEnabled) {
+      flagSound.play();
       if (tile.innerText == "") {
+        document.getElementById("bugs-count").innerText =  parseInt(document.getElementById("bugs-count").innerText) - 1;
         tile.innerText = "🧹";
       } else if (tile.innerText == "🧹") {
+        document.getElementById("bugs-count").innerText =  parseInt(document.getElementById("bugs-count").innerText) + 1;
         tile.innerText = "";
       }
       return;
@@ -87,9 +92,12 @@ class App {
     let r = parseInt(coords[0]);
     let c = parseInt(coords[1]);
     this.checkMine(r, c);
+    clickSound.play();
   }
 
   revealMines() {
+    const mineSound = new Audio('sounds/mine.mp3');
+    mineSound.play();
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.columns; c++) {
         let tile = this.board[r][c];
@@ -102,6 +110,8 @@ class App {
   }
 
   checkMine(r, c) {
+    const victorySound = new Audio('sounds/victory.mp3');
+
     if (r < 0 || r >= this.rows || c < 0 || c >= this.columns) {
       return;
     }
@@ -143,6 +153,7 @@ class App {
     if (this.tilesClicked === this.rows * this.columns - this.minesCount) {
       document.getElementById("bugs-count").innerText = "cleared";
       this.gameOver = true;
+      victorySound.play();
     }
   }
 
