@@ -53,7 +53,7 @@ Devvit.addCustomPostType({
             </hstack>
           </vstack>
           <spacer />
-          <button onPress={onShowWebviewClick}>Launch Minesweeper</button>
+          <button onPress={onShowWebviewClick}>Start</button>
         </vstack>
         <vstack grow={webviewVisible} height={webviewVisible ? '100%' : '0%'}>
           <vstack border="thick" borderColor="black" height={webviewVisible ? '100%' : '0%'}>
