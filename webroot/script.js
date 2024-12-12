@@ -3,11 +3,13 @@ class App {
     this.board = [];
     this.rows = 8;
     this.columns = 8;
-    this.minesCount = 10;
+    this.minesCount = 8;
     this.minesLocation = [];
     this.tilesClicked = 0;
     this.flagEnabled = false;
     this.gameOver = false;
+    this.timer;
+    this.seconds = 0;
 
     window.onload = () => {
       this.startGame();
@@ -29,6 +31,7 @@ class App {
   }
 
   startGame() {
+    const timeDisplay = document.getElementById('time-display');
     document.getElementById("bugs-count").innerText = this.minesCount;
     document.getElementById("broom-button").addEventListener("click", this.setFlag.bind(this));
     this.setMines();
@@ -49,6 +52,11 @@ class App {
       this.board.push(row);
     }
     console.log(this.board);
+
+    this.timer = setInterval(() => {
+      this.seconds++;
+      timeDisplay.textContent = this.seconds;
+    }, 1000);
   }
 
   setFlag() {
@@ -71,14 +79,19 @@ class App {
     }
 
     if (this.flagEnabled) {
-      flagSound.play();
-      if (tile.innerText == "") {
+      if (tile.innerText == "" && parseInt(document.getElementById("bugs-count").innerText) > 0) {
+        flagSound.play();
         document.getElementById("bugs-count").innerText =  parseInt(document.getElementById("bugs-count").innerText) - 1;
         tile.innerText = "🧹";
       } else if (tile.innerText == "🧹") {
+        flagSound.play();
         document.getElementById("bugs-count").innerText =  parseInt(document.getElementById("bugs-count").innerText) + 1;
         tile.innerText = "";
       }
+      return;
+    }
+
+    if(tile.innerText == "🧹") {
       return;
     }
 

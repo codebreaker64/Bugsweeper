@@ -18,8 +18,12 @@ Devvit.addCustomPostType({
       return currUser?.username ?? 'anon';
     });
 
-    // Create a reactive state for web view visibility
+    // Create a reactive state for web view visibility and URL
     const [webviewVisible, setWebviewVisible] = useState(false);
+    const [webviewUrl, setWebviewUrl] = useState('');
+    
+    // Create a state for menu visibility
+    const [menuVisible, setMenuVisible] = useState(true);
 
     // When the web view invokes `window.parent.postMessage` this function is called
     const onMessage = async (msg: any) => {
@@ -27,45 +31,53 @@ Devvit.addCustomPostType({
     };
 
     // When the button is clicked, send initial data to web view and show it
-    const onShowWebviewClick = () => {
+    const onShowWebviewClick = (page: string) => {
+      setWebviewUrl(page);
+      setMenuVisible(false); // Hide the menu when a game, leaderboard, or tutorial is shown
       setWebviewVisible(true);
+    };
+
+    // Function to go back to the menu
+    const onBackToMenuClick = () => {
+      setMenuVisible(true); // Show the menu again
+      setWebviewVisible(false); // Hide the webview
     };
 
     // Render the custom post type
     return (
-      <vstack grow padding="small">
-        <vstack
-          grow={!webviewVisible}
-          height={webviewVisible ? '0%' : '100%'}
-          alignment="middle center"
-        >
-          <text size="xlarge" weight="bold">
-            Bugsweeper Game
-          </text>
-          <spacer />
-          <vstack alignment="start middle">
-            <hstack>
-              <text size="medium">Username:</text>
-              <text size="medium" weight="bold">
-                {' '}
-                {username ?? ''}
-              </text>
-            </hstack>
+      <vstack grow padding="small" alignment="center">
+        {/* Menu buttons */}
+        {menuVisible && (
+          <vstack
+            grow={!webviewVisible}
+            height={webviewVisible ? '0%' : '100%'}
+            alignment="middle center"
+          >
+            <text size="xlarge" weight="bold">
+              Bugsweeper Game
+            </text>
+            <button onPress={() => onShowWebviewClick('game.html')}>Start</button>
+            <button onPress={() => onShowWebviewClick('leaderboard.html')}>LeaderBoard</button>
+            <button onPress={() => onShowWebviewClick('tutorial.html')}>How to play?</button>
           </vstack>
-          <spacer />
-          <button onPress={onShowWebviewClick}>Start</button>
-        </vstack>
-        <vstack grow={webviewVisible} height={webviewVisible ? '100%' : '0%'}>
-          <vstack border="thick" borderColor="black" height={webviewVisible ? '100%' : '0%'}>
+        )}
+
+        {/* Webview Container */}
+        {webviewVisible && (
+          <vstack border="thick" borderColor="black" height="100%" width="100%">
             <webview
               id="myWebView"
-              url="page.html"
+              url={webviewUrl}
               onMessage={(msg) => onMessage(msg)}
               grow
-              height={webviewVisible ? '100%' : '0%'}
+              height="100%"
             />
+            {/* Back to Game button when the tutorial or other page is visible */}
+            {webviewUrl === 'tutorial.html' && (
+              <button onPress={onBackToMenuClick}>Back to Menu</button>
+            )}
           </vstack>
-        </vstack>
+        )}
       </vstack>
     );
   },
