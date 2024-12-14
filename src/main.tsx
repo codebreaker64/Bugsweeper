@@ -72,10 +72,25 @@ Devvit.addCustomPostType({
               grow
               height="100%"
             />
-            {/* Back to Game button when the tutorial or other page is visible */}
-            {webviewUrl === 'tutorial.html' && (
+            {webviewUrl === 'game.html' && (
+            <hstack alignment="middle center">
+              <button
+                onPress={() => {
+                  // Send restart message to the game WebView
+                  const webview = context.ui.webView;
+                  if (webview) {
+                    webview.postMessage('myWebView', 'restartGame');
+                  }
+                }}
+              >
+                Restart
+              </button>
               <button onPress={onBackToMenuClick}>Back to Menu</button>
-            )}
+            </hstack>
+          )}
+          {webviewUrl !== 'game.html' && (
+            <button onPress={onBackToMenuClick}>Back to Menu</button>
+          )}
           </vstack>
         )}
       </vstack>

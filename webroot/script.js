@@ -14,6 +14,37 @@ class App {
     window.onload = () => {
       this.startGame();
     };
+
+    window.addEventListener('message', (event) => {
+      const {type, data} = event.data;
+      if(type === 'devvit-message') {
+        const {message} = data;
+        if(message === 'restartGame') {
+          this.restartGame();
+        }
+      }
+    });
+  }
+
+  restartGame() {
+    console.log('Game is restarting...');
+  
+    // Reset game properties to their initial values
+    this.board = [];
+    this.minesLocation = [];
+    this.tilesClicked = 0;
+    this.flagEnabled = false;
+    this.gameOver = false;
+    this.seconds = 0;
+    document.getElementById('time-display').textContent = this.seconds;  // Reset timer display
+    document.getElementById('bugs-count').innerText = this.minesCount;
+    clearInterval(this.timer);
+    // Clear the board UI
+    const boardElement = document.getElementById("board");
+    boardElement.innerHTML = ''; // Remove all existing tiles from the board
+  
+    // Call startGame again to reinitialize everything
+    this.startGame();
   }
 
   setMines() {
@@ -96,6 +127,7 @@ class App {
     }
 
     if (this.minesLocation.includes(tile.id)) {
+      clearInterval(this.timer);
       this.gameOver = true;
       this.revealMines();
       return;
@@ -166,6 +198,7 @@ class App {
     if (this.tilesClicked === this.rows * this.columns - this.minesCount) {
       document.getElementById("bugs-count").innerText = "cleared";
       this.gameOver = true;
+      clearInterval(this.timer);
       victorySound.play();
     }
   }

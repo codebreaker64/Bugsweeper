@@ -111,18 +111,5 @@ ul {
   padding-left: 20px;
 }
 li {
-  margin: 8px 0; /* Reduced margin between items */
-}
-.button {
-  margin-top: 20px;
-  padding: 8px 16px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  font-size: 14px; /* Smaller font size for the button */
-}
-.button:hover {
-  background-color: #45a049;
+  margin: 5px 0; /* Reduced margin between items */
 }
