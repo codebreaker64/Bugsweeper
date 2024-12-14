@@ -74,6 +74,8 @@ class App {
         tile.id = r.toString() + "-" + c.toString();
         tile.classList.add("tile");
 
+        tile.innerText = "🚪";
+
         // Use an anonymous function to ensure "this" refers to the clicked tile
         tile.addEventListener("click", (event) => this.clickTile(event));
 
@@ -110,14 +112,14 @@ class App {
     }
 
     if (this.flagEnabled) {
-      if (tile.innerText == "" && parseInt(document.getElementById("bugs-count").innerText) > 0) {
+      if (tile.innerText == "🚪" && parseInt(document.getElementById("bugs-count").innerText) > 0) {
         flagSound.play();
         document.getElementById("bugs-count").innerText =  parseInt(document.getElementById("bugs-count").innerText) - 1;
         tile.innerText = "🧹";
       } else if (tile.innerText == "🧹") {
         flagSound.play();
         document.getElementById("bugs-count").innerText =  parseInt(document.getElementById("bugs-count").innerText) + 1;
-        tile.innerText = "";
+        tile.innerText = "🚪";
       }
       return;
     }
@@ -167,6 +169,7 @@ class App {
     }
 
     tile.classList.add("tile-clicked");
+    tile.innerText = "";
     this.tilesClicked += 1;
 
     let minesFound = 0;
