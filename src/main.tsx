@@ -66,8 +66,6 @@ Devvit.addCustomPostType({
             <spacer size="medium" />
             <button onPress={() => onShowWebviewClick('game.html')}>Start</button>
             <spacer size="medium" />
-            <button onPress={() => onShowWebviewClick('leaderboard.html')}>LeaderBoard</button>
-            <spacer size="medium" />
             <button onPress={() => onShowWebviewClick('tutorial.html')}>How to play?</button>
           </vstack>
         )}
